@@ -44,14 +44,11 @@ while (typeof exitCode === "undefined") {
 
   const abortController = new AbortController();
 
-  try {
-    Deno.signal(Deno.Signal.SIGINT).then(() => abortController.abort());
-  } catch (err) {
-    if (Deno.build.os !== "windows") {
-      log.error(
-        `${err.message}: Unable to listen for SIGINT. There might be problems stopping MovieMatch.`,
-      );
-    }
+  // Replaces deprecated Deno.signal() API
+  if ("addSignalListener" in Deno) {
+    Deno.addSignalListener("SIGINT", () => abortController.abort());
+  } else {
+    log.warning("Unable to listen for SIGINT; 'addSignalListener' not available.");
   }
 
   try {

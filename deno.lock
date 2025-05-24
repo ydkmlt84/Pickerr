@@ -1,16 +1,11 @@
 {
-  "version": "3",
+  "version": "5",
   "remote": {
-    "https://cdn.skypack.dev/-/nanoclone@v0.2.1-ZuCgEBPFq6PJo7Zsufwl/dist=es2019,mode=imports/optimized/nanoclone.js": "5d96091ee6a65b053c7215a96286f1c8a206ca2304378496dbdd832217e4854d",
     "https://cdn.skypack.dev/-/nanoclone@v0.2.1-ZuCgEBPFq6PJo7Zsufwl/dist=es2020,mode=imports/optimized/nanoclone.js": "5d96091ee6a65b053c7215a96286f1c8a206ca2304378496dbdd832217e4854d",
-    "https://cdn.skypack.dev/-/property-expr@v2.0.4-EBDskEGXSDwAtFOLyJG0/dist=es2019,mode=imports/optimized/property-expr.js": "f950bca58e3fd4444addcb4813796090d778bb40a742140b74629eed2fdbee77",
     "https://cdn.skypack.dev/-/property-expr@v2.0.4-EBDskEGXSDwAtFOLyJG0/dist=es2020,mode=imports/optimized/property-expr.js": "f950bca58e3fd4444addcb4813796090d778bb40a742140b74629eed2fdbee77",
-    "https://cdn.skypack.dev/-/toposort@v2.0.2-Uux3gYGPtoF0E7ZSTTEg/dist=es2019,mode=imports/optimized/toposort.js": "329da627fa8f7b47dbd1905d9ddc7f94390608d160e3bf1d575f76b9dc3ada5f",
     "https://cdn.skypack.dev/-/toposort@v2.0.2-Uux3gYGPtoF0E7ZSTTEg/dist=es2020,mode=imports/optimized/toposort.js": "329da627fa8f7b47dbd1905d9ddc7f94390608d160e3bf1d575f76b9dc3ada5f",
-    "https://cdn.skypack.dev/-/yup@v0.32.9-6cPuc5XrrJs8vDer2B09/dist=es2019,mode=imports/optimized/yup.js": "55b9581a1425416e0cd2cadf6e1d440a987de70ae2e11feb9e1cbbb11d06412f",
     "https://cdn.skypack.dev/-/yup@v0.32.9-V1IHphwO2td6lU13qiPi/dist=es2020,mode=imports/optimized/yup.js": "7a1287c5ac9e15591880072008ca1e304c325ed8f9135e07a9b155d9ec544d15",
     "https://cdn.skypack.dev/pin/yup@v0.32.9-V1IHphwO2td6lU13qiPi/mode=imports/optimized/yup.js": "265ae3390baec4980418101971b44b40c383f9c094ae422ef76474aa9ed1064e",
-    "https://cdn.skypack.dev/yup@0.32.9?dts": "5355ca3cd68c75b91869328a095bb7b71fbcc59c79fdc6c37d682e95de096d88",
     "https://deno.land/std@0.69.0/_util/assert.ts": "e1f76e77c5ccb5a8e0dbbbe6cce3a56d2556c8cb5a9a8802fc9565af72462149",
     "https://deno.land/std@0.69.0/path/_constants.ts": "aba480c4a2c098b6374fdd5951fea13ecc8aaaf8b8aa4dae1871baa50243d676",
     "https://deno.land/std@0.69.0/path/_interface.ts": "5876f91d35fd42624893a4aaddaee352144e1f46e719f1dde6511bab7c3c1029",
@@ -139,7 +134,6 @@
     "https://deno.land/x/compress@v0.3.6/gzip/mod.ts": "42a51f43eedbdc8522dec16c6ef58671f06b1ba270b86a14780af8a0bc017366",
     "https://deno.land/x/compress@v0.3.6/gzip/writer_gunzip.ts": "0e08971118dc7f22f67312f0700c8a854bec747c28c183e4c1cf5d6d7c5ef19d",
     "https://deno.land/x/compress@v0.3.6/gzip/writer_gzip.ts": "151d731e84dccdcaee2fde7b668a8ae0dc8f300f36b14a60202747113abeb151",
-    "https://deno.land/x/compress@v0.3.6/interface.ts": "169067c1fc3c6ac677afbffd2df59418a4927d851252fac67b881ada4dd6a1ba",
     "https://deno.land/x/compress@v0.3.6/mod.ts": "19be50e35e5bf50bfbf7895ae953aa30314fdd10bff2f919a7417cca5ded55a6",
     "https://deno.land/x/compress@v0.3.6/tar/mod.ts": "a7b709d7886f42e724516a7fa1522876b06b7f361c1fa908c486714be42a278b",
     "https://deno.land/x/compress@v0.3.6/tgz/mod.ts": "cc2c230c3b97b7965aaa287acb546f8da0e65933cd7a3f4ba7f6e89f80b61853",
@@ -170,10 +164,16 @@
     "https://deno.land/x/negotiator@1.0.1/src/encoding.ts": "bd3e980c10de08798192cd56f1913e0c9f9be2b56391d7b4213f448cc94a0140",
     "https://deno.land/x/negotiator@1.0.1/src/language.ts": "bd822581a7621bbe8c3157d38b4f1ec5a35d75eb58bf6be927d477d929e689a2",
     "https://deno.land/x/negotiator@1.0.1/src/media_type.ts": "bde7a0f6a276fdb3b72569832ca6050ce5bcacad9d493029239af768bd06149f",
-    "https://deno.land/x/negotiator@1.0.1/src/types.ts": "3f2a779b3432bd5e2942965f326d82962e7e9b7a72b30fd81aeb0128f898303d",
     "https://deno.land/x/xmlp@v0.2.8/context.ts": "d61d0bd69a5c71b9e39507540c216e15c26e72509556028a273d006befa4f188",
     "https://deno.land/x/xmlp@v0.2.8/handler.ts": "65c0b277b2e1a2cd8c59390d9fabc94b1b9a21b91000f3ad232cf16d002a591e",
     "https://deno.land/x/xmlp@v0.2.8/mod.ts": "1b0d3c7d4e0824ff3d3d5fc90d697ceb46a5dff1315e3a9b8c3cc20aa31753dc",
     "https://deno.land/x/xmlp@v0.2.8/parser.ts": "d8353099e10f2e6125e615e5b4c69ec7f054ce94b5963cd50eac92ad4b0aaf2d"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:rimraf@5"
+      ]
+    }
   }
 }

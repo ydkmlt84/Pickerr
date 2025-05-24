@@ -1,5 +1,5 @@
 import React, { StrictMode } from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Provider, useDispatch } from "react-redux";
 
 import "./main.css";
@@ -60,14 +60,15 @@ const MovieMatch = () => {
   );
 };
 
-render(
+const root = createRoot(document.getElementById("app")!);
+root.render(
   <StrictMode>
     <Provider store={store}>
       <MovieMatch />
     </Provider>
-  </StrictMode>,
-  document.getElementById("app"),
+  </StrictMode>
 );
+
 
 if (
   window.innerHeight !==

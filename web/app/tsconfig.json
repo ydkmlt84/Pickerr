@@ -4,7 +4,7 @@
     "module": "esnext",
     "target": "esnext",
     "moduleResolution": "node",
-    "jsx": "preserve",
+    "jsx": "react",
     "baseUrl": "./",
     /* paths - import rewriting/resolving */
     "paths": {
@@ -19,7 +19,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "importsNotUsedAsValues": "error",
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "isolatedModules": true
