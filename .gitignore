@@ -65,10 +65,11 @@ config.yaml
 !.yarn/sdks
 !.yarn/versions
 
-# Snowpack
-web_modules/
 
 # Deno
 deps.ts
 deps.lock
 pkg.ts
+
+# Legacy frontend
+web/app/*
