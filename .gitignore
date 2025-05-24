@@ -45,6 +45,7 @@ coverage/
 .env.development.local
 .env.test.local
 .env.production.local
+config.yaml
 
 # macOS system files
 .DS_Store
