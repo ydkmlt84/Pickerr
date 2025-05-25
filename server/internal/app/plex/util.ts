@@ -1,5 +1,5 @@
-import { XMLPullParser } from "/deps.ts";
-import { Filter } from "/types/moviematch.ts";
+import { XMLPullParser } from "../../../deps.ts";
+import { Filter } from "../../../types/moviematch.ts";
 
 export const filterToQueryString = (
   { key, value, operator }: Filter,

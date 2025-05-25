@@ -1,29 +1,25 @@
 {
-  "name": "moviematch",
+  "name": "pickerr",
   "version": "1.0.0",
   "scripts": {
-    "start-server": "denon -c configs/denon.config.json run --inspect -A --unstable --import-map=./configs/import_map.json ./cmd/moviematch/main.ts",
-    "start-ui": "rimraf web/app/build && cd web/app && npx snowpack dev",
-    "start": "npm run start-server & npm run start-ui",
-    "build-ui": "cd web/app && node -e \"process.env.VERSION = require('fs').readFileSync('../../VERSION', 'utf8').trim(); require('child_process').execSync('yarn build', { stdio: 'inherit', env: process.env })\"",
-    "build-bundle": "npm run clean && npm run build-ui && mkdir build && powershell -Command \"deno run -A --unstable --import-map=./configs/import_map.json ./cmd/moviematch/pkger.ts web/app/build web/template/index.html configs/localization VERSION | Out-File -Encoding utf8 build/pkg.ts\" && powershell -Command \"(Get-Content configs/import_map.json) -replace 'pkger.ts', 'pkger_release.ts' | Set-Content build/import_map.json\" && deno bundle --unstable --lock deps.lock --import-map=build/import_map.json ./cmd/moviematch/main.ts > build/moviematch.js",
-    "build-binary-windows": "npm run build-bundle && deno compile --unstable --allow-read --allow-write --allow-env --allow-net --target x86_64-pc-windows-msvc --output build/windows-amd64/moviematch build/moviematch.js",
-    "build-binary-linux": "npm run build-bundle && deno compile --unstable --allow-read --allow-write --allow-env --allow-net --target x86_64-unknown-linux-gnu --output build/linux-amd64/moviematch build/moviematch.js",
-    "test": "deno test -A --unstable --import-map=./configs/import_map.json internal",
-    "lint": "deno fmt --check --ignore=build,web/app/node_modules,web/app/build && deno lint --ignore=build,web/app && cd web/app && npx tsc",
+    "start-server": "denon -c server/configs/denon.config.json run --inspect -A --lock=server/deno.lock --import-map=server/configs/import_map.json server/cmd/moviematch/main.ts",
+    "start-ui": "yarn --cwd ui dev",
+    "start": "yarn start-server & yarn start-ui",
+    "build-ui": "yarn --cwd ui build",
+    "build-binary-windows": "yarn build-bundle && deno compile --unstable --allow-read --allow-write --allow-env --allow-net --target x86_64-pc-windows-msvc --output build/windows-amd64/moviematch build/moviematch.js",
+    "build-binary-linux": "yarn build-bundle && deno compile --unstable --allow-read --allow-write --allow-env --allow-net --target x86_64-unknown-linux-gnu --output build/linux-amd64/moviematch build/moviematch.js",
+    "test": "deno test -A --unstable --import-map=server/configs/import_map.json server/internal",
+    "lint": "deno fmt --check --ignore=build,web/app/node_modules,web/app/build && deno lint --ignore=build,web/app && yarn --cwd web/app tsc",
     "install-ui": "yarn --cwd web/app install",
-    "install-deno": "deno install --unstable -qAf https://deno.land/x/denon@2.4.7/denon.ts && deno run --unstable -A https://deno.land/x/puppeteer@9.0.0/install.ts",
+    "install-deno": "deno install --unstable --global -qAf https://deno.land/x/denon@2.4.7/denon.ts && deno run --unstable -A https://deno.land/x/puppeteer@9.0.0/install.ts",
     "clean": "rimraf build web/app/build",
     "format": "deno fmt --ignore=build,web/app/node_modules,web/app/build",
-    "update-lockfile": "deno cache --reload --unstable --lock deps.lock --lock-write --import-map=./configs/import_map.json ./cmd/moviematch/main.ts"
+    "update-lockfile": "deno cache --reload --lock=server/deno.lock --import-map=server/configs/import_map.json server/cmd/moviematch/main.ts"
   },
   "devDependencies": {
     "rimraf": "^5.0.0"
   },
   "dependencies": {
-    "@snowpack/plugin-dotenv": "^2.2.0",
-    "@snowpack/plugin-react-refresh": "^2.5.0",
-    "@snowpack/plugin-typescript": "^1.2.1",
     "http2-proxy": "^5.0.53"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

@@ -1,23 +1,25 @@
-import { ServerRequest } from "/deps.ts";
 import { log } from "/deps.ts";
-import { acceptWebSocket } from "/deps.ts";
 import { RouteContext } from "/internal/app/moviematch/types.ts";
 import { Client } from "/internal/app/moviematch/client.ts";
 
-export const handler = async (
-  req: ServerRequest,
-  ctx: RouteContext,
-) => {
+export const handler = (req: Request, ctx: RouteContext): Response => {
   try {
-    const webSocket = await acceptWebSocket({
-      bufReader: req.r,
-      bufWriter: req.w,
-      ...req,
+    const { response, socket } = Deno.upgradeWebSocket(req);
+
+    const client = new Client(socket, ctx);
+    client.finished.catch((err: unknown) => {
+      log.error(
+        `Client error: ${err instanceof Error ? err.message : String(err)}`
+      );
     });
 
-    const client = new Client(webSocket, ctx);
-    await client.finished;
+    return response;
   } catch (err) {
-    log.error(`Failed to upgrade to a WebSocket ${String(err)}`);
+    log.error(
+      `Failed to upgrade to WebSocket: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return new Response("WebSocket upgrade failed", { status: 400 });
   }
 };

@@ -10,7 +10,7 @@ import type {
   Login,
   Rate,
   ServerMessage,
-} from "../../../types/moviematch";
+} from "../../../server/types/moviematch.ts";
 
 let API_URL: string;
 
@@ -22,7 +22,6 @@ if (typeof window !== "undefined") {
 } else {
   API_URL = "ws://localhost:3000/api/ws"; // fallback default (won’t be used in SSR)
 }
-
 
 type FilterClientMessageByType<
   A extends ClientMessage,
@@ -175,13 +174,12 @@ export class MovieMatchClient extends EventTarget {
   requestFilters = async () => {
     await this.waitForConnected();
     this.sendMessage({ type: "requestFilters" });
-  
+
     return await Promise.race([
       this.waitForMessage("requestFiltersSuccess"),
       this.waitForMessage("requestFiltersError"),
     ]);
   };
-  
 
   requestFilterValues = async (filterValueRequest: FilterValueRequest) => {
     this.sendMessage({

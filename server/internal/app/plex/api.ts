@@ -1,14 +1,11 @@
-import { log } from "/deps.ts";
-import type {
-  FilterValue,
-  FilterValues,
-} from "./types/library_filter_values.ts";
-import { requestNet } from "/internal/app/moviematch/util/permission.ts";
-import { Capabilities } from "/internal/app/plex/types/capabilities.ts";
-import { Identity } from "/internal/app/plex/types/identity.ts";
-import { PlexMediaContainer } from "/internal/app/plex/types/common.ts";
-import { Libraries, Library } from "/internal/app/plex/types/libraries_list.ts";
-import { LibraryItems, Meta } from "/internal/app/plex/types/library_items.ts";
+import { log } from "../../../deps.ts";
+import type { FilterValue, FilterValues } from "./types/library_filter_values.ts";
+import { requestNet } from "../moviematch/util/permission.ts";
+import { Capabilities } from "../plex/types/capabilities.ts";
+import { Identity } from "../plex/types/identity.ts";
+import { PlexMediaContainer } from "../plex/types/common.ts";
+import { Libraries, Library } from "../plex/types/libraries_list.ts";
+import { LibraryItems, Meta } from "../plex/types/library_items.ts";
 
 export interface PlexApiOptions {
   language?: string;

@@ -13,30 +13,14 @@
 //
 // This module is a quickly hacked together bundler reminiscent of Golang's pkger - https://github.com/markbates/pkger
 
-import { base64, extname, gzip, resolvePath, walk } from "/deps.ts";
+import { base64, resolvePath, walk } from "/deps.ts";
 
 const pkg: Record<string, string> = {};
 
-const EXTENSIONS_TO_COMPRESS = [
-  ".css",
-  ".js",
-  ".map",
-  ".png",
-  ".svg",
-  ".ico",
-  ".webmanifest",
-];
-
 const bundleFile = async (
-  fileName: string,
+  fileName: string
 ): Promise<[path: string, data: string]> => {
-  let rawData = await Deno.readFile(fileName);
-
-  if (EXTENSIONS_TO_COMPRESS.includes(extname(fileName))) {
-    // Deno doesn't yet have native support for zlib,
-    // so I'm preferring to compress what I can upfront.
-    rawData = gzip(rawData);
-  }
+  const rawData = await Deno.readFile(fileName);
 
   const data = base64.fromUint8Array(rawData);
 
@@ -66,5 +50,5 @@ for (const path of Deno.args) {
 }
 
 console.log(
-  `export const pkg: Record<string, string> = ${JSON.stringify(pkg)}`,
+  `export const pkg: Record<string, string> = ${JSON.stringify(pkg)}`
 );

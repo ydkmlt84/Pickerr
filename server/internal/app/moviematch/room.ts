@@ -17,19 +17,19 @@ import { Client } from "/internal/app/moviematch/client.ts";
 import type { RouteContext } from "./types.ts";
 
 export class RoomExistsError extends Error {
-  name = "RoomExistsError";
+  override name = "RoomExistsError";
 }
 export class AccessDeniedError extends Error {
-  name = "AccessDeniedError";
+  override name = "AccessDeniedError";
 }
 export class RoomNotFoundError extends Error {
-  name = "RoomNotFoundError";
+  override name = "RoomNotFoundError";
 }
 export class UserAlreadyJoinedError extends Error {
-  name = "UserAlreadyJoinedError";
+  override name = "UserAlreadyJoinedError";
 }
 export class NoMediaError extends Error {
-  name = "NoMediaError";
+  override name = "NoMediaError";
 }
 
 export class Room {
@@ -75,7 +75,7 @@ export class Room {
     media.sort(() => 0.5 - Math.random());
 
     return new Map<string, Media>(
-      media.map((media) => ([media.id, media])),
+      media.map((media) => [media.id, media]),
     );
   });
 
@@ -91,12 +91,10 @@ export class Room {
     const existingRatings = this.ratings.get(rating.mediaId);
     const progress = (this.userProgress.get(userName) ?? 0) + 1;
     if (existingRatings) {
-      const existingRatingByUser = existingRatings.find(([_userName]) =>
-        _userName === userName
-      );
+      const existingRatingByUser = existingRatings.find(([_userName]) => _userName === userName);
 
       if (existingRatingByUser) {
-        log.warning(`${userName} has already rated ${rating.mediaId}.`);
+        log.warn(`${userName} has already rated ${rating.mediaId}.`);
         return;
       }
 

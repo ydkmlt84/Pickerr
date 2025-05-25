@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Formik } from "formik";
 import { useDispatch } from "react-redux";
-import type { Config } from "../../../../../types/moviematch";
+import type { Config } from "../../../../../server/types/moviematch";
 import { AddRemoveList } from "../../atoms/AddRemoveList";
 import { Field } from "../../molecules/Field";
 import { Layout } from "../../layout/Layout";
@@ -21,22 +21,22 @@ export const ConfigScreen = () => {
   return (
     <Layout>
       <Formik
-          initialValues={{
-            hostname: "",
-            port: "",
-            logLevel: "INFO",
-            rootPath: "",
-            servers: [
-              {
-                url: "",
-                token: "",
-                libraryTitleFilter: [""],
-                libraryTypeFilter: [""],
-                linkType: "app",
-              },
-            ],
-            ...(config?.initialConfiguration ?? {}),
-          }}
+        initialValues={{
+          hostname: "",
+          port: "",
+          logLevel: "INFO",
+          rootPath: "",
+          servers: [
+            {
+              url: "",
+              token: "",
+              libraryTitleFilter: [""],
+              libraryTypeFilter: [""],
+              linkType: "app",
+            },
+          ],
+          ...(config?.initialConfiguration ?? {}),
+        }}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
           dispatch({ type: "setup", payload: values as Config });
@@ -58,7 +58,11 @@ export const ConfigScreen = () => {
               name="hostname"
               label="Host"
               value={values.hostname}
-              errorMessage={typeof errors.hostname === "string" ? errors.hostname : undefined}
+              errorMessage={
+                typeof errors.hostname === "string"
+                  ? errors.hostname
+                  : undefined
+              }
               onChange={handleChange}
               onBlur={handleBlur}
             />
@@ -66,15 +70,20 @@ export const ConfigScreen = () => {
               name="port"
               label="Port"
               value={values.port}
-              errorMessage={typeof errors.port === "string" ? errors.port : undefined}
-
+              errorMessage={
+                typeof errors.port === "string" ? errors.port : undefined
+              }
               onChange={handleChange}
               onBlur={handleBlur}
             />
             <Field
               name="logLevel"
               label="Log Level"
-              errorMessage={typeof errors.logLevel === "string" ? errors.logLevel : undefined}
+              errorMessage={
+                typeof errors.logLevel === "string"
+                  ? errors.logLevel
+                  : undefined
+              }
             >
               <Select
                 name="logLevel"
@@ -124,13 +133,13 @@ export const ConfigScreen = () => {
                         onRemove={(i) => {
                           const newValue = values.servers![
                             index
-                          ].libraryTitleFilter!.flatMap((
-                            value: any,
-                            index: any,
-                          ) => index !== i ? value : []);
+                          ].libraryTitleFilter!.flatMap(
+                            (value: string, idx: number) =>
+                              idx !== i ? value : []
+                          );
                           setFieldValue(
                             `servers.${index}.libraryTitleFilter`,
-                            newValue,
+                            newValue
                           );
                         }}
                       >
@@ -139,8 +148,10 @@ export const ConfigScreen = () => {
                             name={`servers.${index}.libraryTitleFilter.${i}`}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            value={((values.servers![index] ?? {})
-                              .libraryTitleFilter ?? [])[i] ?? ""}
+                            value={
+                              ((values.servers![index] ?? {})
+                                .libraryTitleFilter ?? [])[i] ?? ""
+                            }
                           />
                         )}
                       </AddRemoveList>
@@ -154,14 +165,18 @@ export const ConfigScreen = () => {
                         {(i) => (
                           <Select
                             name={`servers.${index}.libraryTypeFilter.${i}`}
-                            value={((values.servers![index] ?? {})
-                              .libraryTypeFilter ?? [])[i] ?? ""}
+                            value={
+                              ((values.servers![index] ?? {})
+                                .libraryTypeFilter ?? [])[i] ?? ""
+                            }
                             options={{
                               movie: "Movies",
                               show: "TV Shows",
                               artist: "Music",
                               photo: "Photos",
                             }}
+                            onChange={handleChange} // ✅ Fix here
+                            onBlur={handleBlur} // ✅ Optional but recommended
                           />
                         )}
                       </AddRemoveList>
@@ -175,13 +190,15 @@ export const ConfigScreen = () => {
                           webLocal: "Local Web app",
                           webExternal: "External Web app (plex.tv)",
                         }}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
                     </Field>
                   </div>
                 )}
               </AddRemoveList>
             </Field>
-            <Button appearance="Primary" onPress={() => handleSubmit()}>
+            <Button appearance="Primary" onClick={() => handleSubmit()}>
               Configure
             </Button>
           </form>

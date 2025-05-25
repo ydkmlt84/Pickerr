@@ -47,7 +47,9 @@ export const JoinScreen = () => {
         {/* Error message transition (Headless UI style) */}
         {/* You could wrap this in <Transition> for animation if you want */}
         {store.error && (
-          <ErrorMessage message={store.error.message ?? store.error.type ?? ""} />
+          <ErrorMessage
+            message={store.error.message ?? store.error.type ?? ""}
+          />
         )}
 
         <Field
@@ -61,14 +63,14 @@ export const JoinScreen = () => {
         <ButtonContainer paddingTop="s7" reverseMobile>
           <Button
             appearance="Tertiary"
-            onPress={() => dispatch({ type: "logout" })}
+            onClick={() => dispatch({ type: "logout" })}
             testHandle="logout"
           >
             <Tr name="LOGOUT" />
           </Button>
           <Button
             appearance="Secondary"
-            onPress={() =>
+            onClick={() =>
               dispatch({
                 type: "navigate",
                 payload: { route: "createRoom", routeParams: { roomName } },
@@ -80,7 +82,7 @@ export const JoinScreen = () => {
           </Button>
           <Button
             appearance="Primary"
-            onPress={() => {
+            onClick={() => {
               if (!roomName) {
                 setRoomNameError("Room name is required");
                 return;

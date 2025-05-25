@@ -1,9 +1,8 @@
-import { ServerRequest } from "/deps.ts";
 import { RouteContext, RouteHandler } from "/internal/app/moviematch/types.ts";
 
 export const handler: RouteHandler = async (
-  req: ServerRequest,
-  ctx: RouteContext,
+  req: Request,
+  ctx: RouteContext
 ) => {
   const { providerIndex, key } = ctx.params ?? {};
   if (!key || !providerIndex) {
@@ -15,10 +14,9 @@ export const handler: RouteHandler = async (
     return;
   }
 
-  const url = await provider.getCanonicalUrl(
-    key,
-    { userAgent: req.headers.get("user-agent") },
-  );
+  const url = await provider.getCanonicalUrl(key, {
+    userAgent: req.headers.get("user-agent"),
+  });
 
   return {
     status: 302,

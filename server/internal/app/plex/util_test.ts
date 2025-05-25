@@ -1,4 +1,4 @@
-import { assertEquals } from "/deps.ts";
+import { assertEquals } from "../../../deps.ts";
 import { parseXML } from "./util.ts";
 
 Deno.test("parseXML - with children", () => {

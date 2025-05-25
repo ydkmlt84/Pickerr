@@ -48,7 +48,7 @@ export const LoginScreen = () => {
   appearance="Primary"
   onClick={async () => {
     if (!userName) {
-      setUserNameError(translations?.FIELD_REQUIRED_ERROR!);
+      setUserNameError(translations?.FIELD_REQUIRED_ERROR ?? "This field is required");
       return;
     }
     dispatch({ type: "login", payload: { userName } });

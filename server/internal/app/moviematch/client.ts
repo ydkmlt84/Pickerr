@@ -1,4 +1,4 @@
-import { Deferred, deferred, log, WebSocket } from "/deps.ts";
+import { deferred, log } from "../../../deps.ts";
 import {
   ClientMessage,
   Config,
@@ -21,10 +21,7 @@ import {
   RoomNotFoundError,
   UserAlreadyJoinedError,
 } from "/internal/app/moviematch/room.ts";
-import {
-  getConfig,
-  updateConfiguration,
-} from "/internal/app/moviematch/config/main.ts";
+import { getConfig, updateConfiguration } from "/internal/app/moviematch/config/main.ts";
 import { ConfigReloadError } from "/internal/app/moviematch/config/errors.ts";
 import { validateConfig } from "/internal/app/moviematch/config/validate.ts";
 import { RouteContext } from "/internal/app/moviematch/types.ts";
@@ -33,7 +30,7 @@ import { getTranslations } from "/internal/app/moviematch/i18n.ts";
 import { shutdown } from "/internal/app/moviematch/app.ts";
 
 export class Client {
-  finished: Deferred<void> = deferred();
+  finished: deferred<void>;
   ws: WebSocket;
   ctx: RouteContext;
   room?: Room;
@@ -52,7 +49,7 @@ export class Client {
   }
 
   private sendConfig() {
-    if (this.ws.isClosed) {
+    if (this.ws.readyState === WebSocket.CLOSED) {
       throw new Error(`Cannot send config when WebSocket is closed`);
     }
 
@@ -72,77 +69,71 @@ export class Client {
     });
   }
 
-  private async listenForMessages() {
-    try {
-      for await (const messageText of this.ws) {
-        if (this.ws.isClosed) {
-          break;
-        }
+  private listenForMessages() {
+    this.ws.addEventListener("message", async (event: MessageEvent) => {
+      if (this.ws.readyState === WebSocket.CLOSED) return;
 
-        if (typeof messageText === "string") {
-          let message: ServerMessage;
-          try {
-            message = JSON.parse(messageText);
-          } catch (err) {
-            log.error(`Failed to parse message: ${messageText}`, String(err));
-            return;
-          }
+      const messageText = event.data;
+      if (typeof messageText !== "string") return;
 
-          try {
-            switch (message.type) {
-              case "login":
-                await this.handleLogin(message.payload);
-                break;
-              case "logout":
-                await this.handleLogout();
-                break;
-              case "createRoom":
-                await this.handleCreateRoom(message.payload);
-                break;
-              case "joinRoom":
-                await this.handleJoinRoom(message.payload);
-                break;
-              case "leaveRoom":
-                await this.handleLeaveRoom();
-                break;
-              case "rate":
-                await this.handleRate(message.payload);
-                break;
-              case "setLocale":
-                await this.handleSetLocale(message.payload);
-                break;
-              case "setup":
-                await this.handleSetup(message.payload);
-                break;
-              case "requestFilters":
-                await this.handleRequestFilters();
-                break;
-              case "requestFilterValues":
-                await this.handleRequestFilterValues(message.payload);
-                break;
-              default:
-                log.info(`Unhandled message: ${messageText}`);
-                break;
-            }
-          } catch (err) {
-            if (err instanceof ConfigReloadError) {
-              throw err;
-            }
-
-            log.error(`Error handling ${message.type}: ${String(err)}`);
-          }
-        }
-      }
-    } catch (err) {
-      if (err instanceof ConfigReloadError) {
-        throw err;
+      let message: ServerMessage;
+      try {
+        message = JSON.parse(messageText);
+      } catch (err) {
+        log.error(`Failed to parse message: ${messageText}`, String(err));
+        return;
       }
 
-      log.error(`WebSocket had an error. ${String(err)}`);
-    } finally {
-      log.debug(`WebSocket listenForMessages has finished`);
+      try {
+        switch (message.type) {
+          case "login":
+            await this.handleLogin(message.payload);
+            break;
+          case "logout":
+            await this.handleLogout();
+            break;
+          case "createRoom":
+            await this.handleCreateRoom(message.payload);
+            break;
+          case "joinRoom":
+            await this.handleJoinRoom(message.payload);
+            break;
+          case "leaveRoom":
+            await this.handleLeaveRoom();
+            break;
+          case "rate":
+            await this.handleRate(message.payload);
+            break;
+          case "setLocale":
+            await this.handleSetLocale(message.payload);
+            break;
+          case "setup":
+            await this.handleSetup(message.payload);
+            break;
+          case "requestFilters":
+            await this.handleRequestFilters();
+            break;
+          case "requestFilterValues":
+            await this.handleRequestFilterValues(message.payload);
+            break;
+          default:
+            log.info(`Unhandled message: ${messageText}`);
+            break;
+        }
+      } catch (err) {
+        if (err instanceof ConfigReloadError) throw err;
+        log.error(`Error handling ${message.type}: ${String(err)}`);
+      }
+    });
+
+    this.ws.addEventListener("close", () => {
+      log.debug(`WebSocket connection closed`);
       this.handleClose();
-    }
+    });
+
+    this.ws.addEventListener("error", (event) => {
+      log.error(`WebSocket error: ${String(event)}`);
+    });
   }
 
   getUsername() {
@@ -165,8 +156,7 @@ export class Client {
           type: "loginError",
           payload: {
             name: "PlexLoginRequired",
-            message:
-              "Anonymous logins are not allowed. Please sign in with Plex.",
+            message: "Anonymous logins are not allowed. Please sign in with Plex.",
           },
         });
         return;
@@ -271,12 +261,24 @@ export class Client {
           users: await this.room.getUsers(),
         },
       });
-    } catch (err) {
+    } catch (err: unknown) {
+      const validErrorNames = [
+        "NotLoggedInError",
+        "RoomExistsError",
+        "UnauthorizedError",
+        "NoMedia",
+      ] as const;
+      type ValidErrorName = typeof validErrorNames[number];
+
+      const name = validErrorNames.includes((err as Error).name as ValidErrorName)
+        ? (err as ValidErrorName)
+        : "NotLoggedInError"; // or whatever fallback makes sense
+
       this.sendMessage({
         type: "createRoomError",
         payload: {
-          name: err.name,
-          message: err.message,
+          name,
+          message: err instanceof Error ? err.message : String(err),
         },
       });
 
@@ -324,26 +326,26 @@ export class Client {
         user: this.getUser(),
         progress: userProgress / mediaSize,
       });
-    } catch (err) {
-      let error: JoinRoomError["name"];
+    } catch (err: unknown) {
+      let error: JoinRoomError["name"] = "UnknownError";
+
       if (err instanceof AccessDeniedError) {
         error = "AccessDeniedError";
       } else if (err instanceof RoomNotFoundError) {
         error = "RoomNotFoundError";
       } else if (err instanceof UserAlreadyJoinedError) {
         error = "UserAlreadyJoinedError";
-      } else {
-        error = "UnknownError";
       }
 
       return this.sendMessage({
         type: "joinRoomError",
         payload: {
           name: error,
-          message: err.message,
+          message: err instanceof Error ? err.message : String(err),
         },
       });
     }
+
     log.debug(
       `Handling room join event: ${JSON.stringify(joinRoomReq)}`,
     );
@@ -487,7 +489,7 @@ export class Client {
     try {
       await this.ws.send(JSON.stringify(msg));
     } catch (_err) {
-      log.warning(`Tried to send message to a disconnected client`);
+      log.warn(`Tried to send message to a disconnected client`);
     }
   }
 }

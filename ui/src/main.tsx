@@ -11,7 +11,7 @@ import { RoomScreen } from "../../web/app/src/components/screens/Room";
 import { Loading } from "../../web/app/src/components/screens/Loading";
 import { ToastList } from "./components/atoms/Toast";
 import { ConfigScreen } from "../../web/app/src/components/screens/Config";
-import type { Routes } from "../../web/app/src/types";
+import type { Routes } from "./types";
 import { createStore, Dispatch, useSelector } from "./store";
 
 const store = createStore();

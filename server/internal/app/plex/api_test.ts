@@ -1,5 +1,5 @@
-import { assert, assertEquals, assertNotEquals, yup } from "/deps.ts";
-import { PlexApi } from "/internal/app/plex/api.ts";
+import { assert, assertEquals, assertNotEquals, yup } from "../../../deps.ts";
+import { PlexApi } from "../plex/api.ts";
 
 const { array, boolean, mixed, number, object, string } = yup;
 

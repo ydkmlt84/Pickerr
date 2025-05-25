@@ -3,10 +3,10 @@
  * See - https://forums.plex.tv/t/authenticating-with-plex/609370
  */
 
-import { requestNet } from "/internal/app/moviematch/util/permission.ts";
-import { parseXML } from "/internal/app/plex/util.ts";
-import { HomeUsers, Users } from "/internal/app/plex/types/users.ts";
-import { PlexMediaContainer } from "/internal/app/plex/types/common.ts";
+import { requestNet } from "../moviematch/util/permission.ts";
+import { parseXML } from "../plex/util.ts";
+import { HomeUsers, Users } from "../plex/types/users.ts";
+import { PlexMediaContainer } from "../plex/types/common.ts";
 
 const APP_NAME = "MovieMatch";
 

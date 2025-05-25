@@ -1,4 +1,3 @@
-import { Response, ServerRequest } from "/deps.ts";
 import { Config } from "/types/moviematch.ts";
 import { MovieMatchProvider } from "/internal/app/moviematch/providers/types.ts";
 
@@ -11,6 +10,6 @@ export interface RouteContext {
 }
 
 export type RouteHandler = (
-  req: ServerRequest,
+  req: Request,
   ctx: RouteContext,
-) => (Promise<Response | void> | Response | void);
+) => Promise<Response | void> | Response | void;

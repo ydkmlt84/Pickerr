@@ -1,4 +1,4 @@
-import { Deferred, deferred, log, serve, Server, serveTLS } from "/deps.ts";
+import { Deferred, deferred, log } from "/deps.ts";
 import { Config } from "/types/moviematch.ts";
 import { handler as serveStaticHandler } from "/internal/app/moviematch/handlers/serve_static.ts";
 import { handler as rootHandler } from "/internal/app/moviematch/handlers/template.ts";
@@ -20,14 +20,8 @@ const routes: Array<readonly [RegExp | string, RouteHandler[]]> = [
   ["/", [basicAuthHandler, rootHandler]],
   ["/health", [healthHandler]],
   ["/api/ws", [apiHandler]],
-  [
-    /^\/api\/poster\/(?<providerIndex>[0-9]+)\/(?<key>[0-9/]+)$/,
-    [basicAuthHandler, posterHandler],
-  ],
-  [
-    /^\/api\/link\/(?<providerIndex>[0-9]+)\/(?<key>[0-9a-z/]+)$/i,
-    [basicAuthHandler, linkHandler],
-  ],
+  [/^\/api\/poster\/(?<providerIndex>[0-9]+)\/(?<key>[0-9/]+)$/, [basicAuthHandler, posterHandler]],
+  [/^\/api\/link\/(?<providerIndex>[0-9]+)\/(?<key>[0-9a-z/]+)$/i, [basicAuthHandler, linkHandler]],
   ["/manifest.webmanifest", [serveStaticHandler]],
   [/.*/, [basicAuthHandler, serveStaticHandler]],
 ];
@@ -51,124 +45,65 @@ export const Application = (
   const statusCode = deferred<number | undefined>();
 
   (async () => {
-    let server: Server;
     let appStatusCode: number | undefined = 0;
 
-    const providers: MovieMatchProvider[] = config.servers.map(
-      (server, index) => {
-        if (typeof server.type === "string" && server.type !== "plex") {
-          throw new Error(`server type ${server.type} unhandled.`);
-        }
-
-        return createPlexProvider(String(index), server);
-      },
-    );
+    const providers: MovieMatchProvider[] = config.servers.map((server, index) => {
+      if (typeof server.type === "string" && server.type !== "plex") {
+        throw new Error(`server type ${server.type} unhandled.`);
+      }
+      return createPlexProvider(String(index), server);
+    });
 
     for (const provider of providers) {
       if (!await provider.isAvailable()) {
-        throw new ProviderUnavailableError(provider.options.url.substr(0, 5));
+        throw new ProviderUnavailableError(provider.options.url.slice(0, 5));
       }
     }
 
-    try {
-      if (!await requestNet(`${config.hostname}:${config.port}`)) {
-        log.critical(
-          `Permission denied: Cannot start MovieMatch on ${config.hostname}:${config.port}`,
-        );
-        Deno.exit(1);
-      }
-      server = config.tlsConfig
-        ? serveTLS({ ...config.tlsConfig, ...config })
-        : serve(config);
-
-      if (signal) {
-        signal.addEventListener("abort", () => {
-          log.info(`Abort signalled in Application. Closing server.`);
-          server.close();
-        });
-      }
-      appAbortController = new AbortController();
-      appAbortController.signal.addEventListener("abort", () => {
-        log.info(`Abort signalled in Application. Closing server.`);
-        server.close();
-        appStatusCode = undefined;
-      });
-    } catch (err) {
+    if (!await requestNet(`${config.hostname}:${config.port}`)) {
       log.critical(
-        `Failed to start an HTTP server. ${
-          err.name === "NotFound" && config.tlsConfig
-            ? `Please check that your TLS_CERT and TLS_FILE values are correct.`
-            : err.message
-        }`,
+        `Permission denied: Cannot start MovieMatch on ${config.hostname}:${config.port}`,
       );
+      Deno.exit(1);
     }
 
-    log.info(
-      `Server listening on ${
-        config.tlsConfig ? "https://" : "http://"
-      }${config.hostname}:${config.port}`,
-    );
+    appAbortController = new AbortController();
 
-    try {
-      const handling = new Set<Promise<void>>();
+    log.info(`Server listening on http://${config.hostname}:${config.port}`);
 
-      for await (const req of server!) {
+    Deno.serve(
+      { hostname: config.hostname, port: config.port, signal: appAbortController.signal },
+      async (req) => {
         const url = urlFromReqUrl(req.url);
-        const [path, handlers] = routes.find(([path]) => {
-          if (typeof path === "string") {
-            return path === url.pathname;
-          } else {
-            return path.test(url.pathname);
-          }
-        }) ?? [];
+        const [path, handlers] = routes.find(([path]) =>
+          typeof path === "string" ? path === url.pathname : path.test(url.pathname)
+        ) ?? [];
 
         if (!handlers || !path) {
           log.error(`No handlers for ${url.pathname}`);
-        } else {
-          (async () => {
-            const dfd = deferred<void>();
-            handling.add(dfd);
-            let response;
-            let params;
-            if (path instanceof RegExp) {
-              params = path.exec(url.pathname)?.groups;
-            }
-            for (const handler of handlers) {
-              response = await handler(req, {
-                providers,
-                config,
-                path,
-                params,
-              });
-              if (response) {
-                break;
-              }
-            }
-
-            if (!response) {
-              response = {
-                status: 404,
-              };
-            }
-
-            try {
-              await req.respond(response);
-            } catch {
-              // Pass
-            }
-
-            dfd.resolve();
-            handling.delete(dfd);
-          })();
+          return new Response("Not found", { status: 404 });
         }
-      }
 
-      log.info("Shutting down...");
+        let response;
+        let params;
 
-      await Promise.all(handling);
-    } finally {
-      log.info("Server closed");
-    }
+        if (path instanceof RegExp) {
+          params = path.exec(url.pathname)?.groups;
+        }
+
+        for (const handler of handlers) {
+          response = await handler(req, {
+            providers,
+            config,
+            path,
+            params,
+          });
+          if (response) break;
+        }
+
+        return response ?? new Response("Not found", { status: 404 });
+      },
+    );
 
     statusCode.resolve(appStatusCode);
   })();

@@ -6,13 +6,13 @@ export class MovieMatchError extends Error {
 }
 
 export class MovieMatchUnknownError extends Error {
-  name = "MovieMatchUnknownError";
+  override name = "MovieMatchUnknownError";
 }
 
 export function assert(
   expr: unknown,
   msg = "",
-  ErrorType = MovieMatchUnknownError,
+  ErrorType = MovieMatchUnknownError
 ): asserts expr {
   if (!expr) {
     throw new ErrorType(msg);
@@ -22,11 +22,11 @@ export function assert(
 export function isRecord(
   value: unknown,
   name = "value",
-  ErrorType = MovieMatchError,
+  ErrorType = MovieMatchError
 ): asserts value is Record<string, unknown> {
   assert(
     typeof value === "object" && value !== null,
     `${name} must be an object`,
-    ErrorType,
+    ErrorType
   );
 }

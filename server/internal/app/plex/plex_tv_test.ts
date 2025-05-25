@@ -1,4 +1,4 @@
-import { assert, yup } from "/deps.ts";
+import { assert, yup } from "../../../deps.ts";
 import { getPlexHomeUsers, getPlexUsers } from "./plex_tv.ts";
 
 const { array, boolean, number, object, string } = yup;

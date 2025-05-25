@@ -1,4 +1,3 @@
-import { ServerRequest } from "/deps.ts";
 import { memo } from "/internal/app/moviematch/util/memo.ts";
 import { getTranslations } from "/internal/app/moviematch/i18n.ts";
 import { getConfig } from "/internal/app/moviematch/config/main.ts";
@@ -14,8 +13,8 @@ const get = (context: KVP, keyPath: string[]): string =>
     keyPath.reduce(
       (subContext: string | KVP, key: string) =>
         typeof subContext === "object" ? subContext[key] ?? "" : subContext,
-      context,
-    ),
+      context
+    )
   );
 
 const interpolate = (template: string, context: KVP): string => {
@@ -28,7 +27,7 @@ const interpolate = (template: string, context: KVP): string => {
 
 const getTemplate = memo(() => readTextFile("/web/template/index.html"));
 
-const getRootPath = (req: ServerRequest, config: Config) => {
+const getRootPath = (req: Request, config: Config) => {
   // X-Forwarded-Prefix is non-standard (https://tools.ietf.org/html/rfc7239#section-4)
   // However, there is no equivalent that provides this functionality,
   // so it's the name I'm going with. This header should be set by the reverse proxy.
@@ -37,7 +36,7 @@ const getRootPath = (req: ServerRequest, config: Config) => {
   return (forwardedPrefix ?? config.rootPath ?? "").trim().replace(/\/$/, "");
 };
 
-export const handler: RouteHandler = async (req: ServerRequest) => {
+export const handler: RouteHandler = async (req: Request) => {
   const config = getConfig();
   const translations = await getTranslations(req.headers);
   const template = await getTemplate();
@@ -47,7 +46,7 @@ export const handler: RouteHandler = async (req: ServerRequest) => {
     headers: new Headers({ "Content-Type": "text/html" }),
     body: interpolate(template, {
       ...translations,
-      config: (config as unknown) as KVP,
+      config: config as unknown as KVP,
       rootPath: getRootPath(req, config),
       version: await getVersion(),
     }),

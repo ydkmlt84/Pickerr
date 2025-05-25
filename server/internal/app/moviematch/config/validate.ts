@@ -31,9 +31,15 @@ import {
   TlsConfigKeyFileInvalid,
 } from "/internal/app/moviematch/config/errors.ts";
 
-export const validateConfig = (
-  value: unknown,
-): MovieMatchError[] => {
+function pushError(err: unknown, errors: MovieMatchError[]) {
+  if (err instanceof Error) {
+    errors.push(err);
+  } else {
+    errors.push(new Error(String(err)));
+  }
+}
+
+export const validateConfig = (value: unknown): MovieMatchError[] => {
   const errors: MovieMatchError[] = [];
 
   try {
@@ -65,10 +71,10 @@ export const validateConfig = (
         ) {
           errors.push(
             new LogLevelInvalid(
-              `logLevel must be one of these: ${
-                Object.keys(log.LogLevels).join(", ")
-              }`,
-            ),
+              `logLevel must be one of these: ${Object.keys(log.LogLevels).join(
+                ", "
+              )}`
+            )
           );
         }
       } else {
@@ -80,7 +86,7 @@ export const validateConfig = (
       errors.push(new ServersMustBeArray(`servers must be an Array`));
     } else if (value.servers.length === 0) {
       errors.push(
-        new ServersMustNotBeEmpty("At least one server must be configured"),
+        new ServersMustNotBeEmpty("At least one server must be configured")
       );
     } else {
       for (const server of value.servers) {
@@ -91,21 +97,25 @@ export const validateConfig = (
             if (server.type !== "plex") {
               errors.push(
                 new ServerTypeInvalid(
-                  `"plex" is the only valid server type. Got "${server.type}"`,
-                ),
+                  `"plex" is the only valid server type. Got "${server.type}"`
+                )
               );
             }
           }
 
           if (typeof server.url !== "string") {
             errors.push(
-              new ServerUrlMustBeString("a server url must be specified"),
+              new ServerUrlMustBeString("a server url must be specified")
             );
           } else {
             try {
               new URL(server.url);
             } catch (err) {
-              errors.push(new ServerUrlInvalid(err.message));
+              if (err instanceof Error) {
+                errors.push(new ServerUrlInvalid(err.message));
+              } else {
+                errors.push(new ServerUrlInvalid(String(err)));
+              }
             }
 
             addRedaction(server.url);
@@ -113,28 +123,26 @@ export const validateConfig = (
 
           if (typeof server.token !== "string" || server.token.length === 0) {
             errors.push(
-              new ServerTokenMustBeString("a server token must be specified"),
+              new ServerTokenMustBeString("a server token must be specified")
             );
           } else {
             addRedaction(server.token);
           }
 
           if (server.libraryTitleFilter) {
-            if (
-              !Array.isArray(server.libraryTitleFilter)
-            ) {
+            if (!Array.isArray(server.libraryTitleFilter)) {
               errors.push(
                 new ServerLibraryTitleFilterInvalid(
-                  "libraryTitleFilter must be a list of strings or a string",
-                ),
+                  "libraryTitleFilter must be a list of strings or a string"
+                )
               );
             } else {
               for (const libraryTitle of server.libraryTitleFilter) {
                 if (typeof libraryTitle !== "string") {
                   errors.push(
                     new ServerLibraryTitleFilterInvalid(
-                      "libraryTitleFilter must be a list of strings or a string",
-                    ),
+                      "libraryTitleFilter must be a list of strings or a string"
+                    )
                   );
                 }
               }
@@ -145,20 +153,18 @@ export const validateConfig = (
             if (!Array.isArray(server.libraryTypeFilter)) {
               errors.push(
                 new ServerLibraryTypeFilterInvalid(
-                  "libraryTypeFilter must be a list of strings",
-                ),
+                  "libraryTypeFilter must be a list of strings"
+                )
               );
             } else {
-              for (
-                const libraryType of (server.libraryTypeFilter as string[])
-              ) {
+              for (const libraryType of server.libraryTypeFilter as string[]) {
                 if (!LibaryTypes.includes(libraryType as LibraryType)) {
                   errors.push(
                     new ServerLibraryTypeFilterInvalid(
-                      `libraryTypeFilter(s) must be one of ${
-                        LibaryTypes.join(", ")
-                      }. Instead you entered "${libraryType}"`,
-                    ),
+                      `libraryTypeFilter(s) must be one of ${LibaryTypes.join(
+                        ", "
+                      )}. Instead you entered "${libraryType}"`
+                    )
                   );
                 }
               }
@@ -173,15 +179,19 @@ export const validateConfig = (
             ) {
               errors.push(
                 new ServerLinkTypeInvalid(
-                  `linkType must be one of these: ${
-                    validLinkTypes.join(", ")
-                  }. Instead, it was "${server.linkType}"`,
-                ),
+                  `linkType must be one of these: ${validLinkTypes.join(
+                    ", "
+                  )}. Instead, it was "${server.linkType}"`
+                )
               );
             }
           }
         } catch (err) {
-          errors.push(err);
+          if (err instanceof Error) {
+            errors.push(err);
+          } else {
+            errors.push(new Error(String(err))); // or wrap in your own error class
+          }
         }
       }
     }
@@ -201,17 +211,17 @@ export const validateConfig = (
         if (typeof value.basicAuth.userName !== "string") {
           errors.push(
             new BasicAuthUserNameInvalid(
-              "basicAuth.anonymousUserName must be a string",
-            ),
+              "basicAuth.anonymousUserName must be a string"
+            )
           );
         }
         if (typeof value.basicAuth.password !== "string") {
           errors.push(
-            new BasicAuthPasswordInvalid("basicAuth.password must be a string"),
+            new BasicAuthPasswordInvalid("basicAuth.password must be a string")
           );
         }
       } catch (err) {
-        errors.push(err);
+        pushError(err, errors);
       }
     }
 
@@ -220,10 +230,10 @@ export const validateConfig = (
         assert(
           typeof value.requirePlexTvLogin === "boolean",
           'requirePlexTvLogin must be "true" or "false"',
-          RequirePlexTvLoginInvalid,
+          RequirePlexTvLoginInvalid
         );
       } catch (err) {
-        errors.push(err);
+        pushError(err, errors);
       }
     }
 
@@ -237,11 +247,11 @@ export const validateConfig = (
           errors.push(new TlsConfigKeyFileInvalid());
         }
       } catch (err) {
-        errors.push(err);
+        pushError(err, errors);
       }
     }
   } catch (err) {
-    errors.push(err);
+    pushError(err, errors);
   }
 
   return errors;

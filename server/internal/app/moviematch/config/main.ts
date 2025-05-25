@@ -21,7 +21,7 @@ export function getConfig() {
 }
 
 export async function loadConfig(
-  path?: string,
+  path?: string
 ): Promise<[config: Config, errors: MovieMatchError[]]> {
   const envConfig = await loadFromEnv();
   let yamlConfig: Partial<Config> | undefined;
@@ -29,11 +29,13 @@ export async function loadConfig(
   try {
     if (await requestRead(".")) {
       const yamlConfigPath = path ?? joinPath(Deno.cwd(), "config.yaml");
+      configPath = yamlConfigPath; // ✅ Save the actual path here
 
       log.info(`Looking for config in ${yamlConfigPath}`);
-      yamlConfig = yamlConfigPath !== "/dev/null"
-        ? await loadFromYaml(yamlConfigPath)
-        : {};
+      yamlConfig =
+        yamlConfigPath !== "/dev/null"
+          ? await loadFromYaml(yamlConfigPath)
+          : {};
     }
   } catch (err) {
     if (path) {
@@ -44,21 +46,19 @@ export async function loadConfig(
   const serversLength = Math.max(
     yamlConfig?.servers?.length ?? 0,
     envConfig?.servers?.length ?? 0,
-    0,
+    0
   );
 
   const config: Partial<Config> = applyDefaults({
     ...yamlConfig,
     ...envConfig,
     ...(serversLength !== 0
-      ? ({
-        servers: Array.from({ length: serversLength }).map(
-          ((_, index) => ({
+      ? {
+          servers: Array.from({ length: serversLength }).map((_, index) => ({
             ...(yamlConfig?.servers ?? [])[index],
             ...(envConfig?.servers ?? [])[index],
           })),
-        ),
-      })
+        }
       : {}),
   });
 
@@ -69,6 +69,8 @@ export async function loadConfig(
   return [cachedConfig, configErrors];
 }
 
+// configPath is set in loadConfig() when the file is found.
+// Used later by updateConfiguration() to overwrite the same file.
 export async function updateConfiguration(config: Record<string, unknown>) {
   cachedConfig = config as unknown as Config;
   const yamlConfig = stringifyYaml(config, { indent: 2 });
@@ -78,7 +80,7 @@ export async function updateConfiguration(config: Record<string, unknown>) {
   if (await requestWrite(configPath ?? defaultConfigPath)) {
     await Deno.writeTextFile(
       configPath ?? joinPath(Deno.cwd(), "config.yaml"),
-      yamlConfig,
+      yamlConfig
     );
   }
 }
